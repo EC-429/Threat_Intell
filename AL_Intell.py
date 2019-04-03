@@ -2,6 +2,9 @@
 import argparse
 import operator
 
+# WHITELIST: Add IP Addresses to the list below to be ignored if found in the access.log
+whitelist = ["127.0.0.1"]
+
 
 def ip_top_offenders(n):
     ips_dict = {}                                                   # Dictionary
@@ -10,10 +13,13 @@ def ip_top_offenders(n):
         for line in log:                                            # loop through each line
             ip = line.split(" ")[0]                                 # split and assign IP
 
-            if ip in ips_dict:                                      # check if IP is already in dict
-                ips_dict[ip] = ips_dict.get(ip) + 1                 # if it is, increment value
+            if ip in whitelist:                                         # Check if IP is in whitelist
+                pass                                                    # if so, pass
             else:
-                ips_dict[ip] = 1                                    # if not, create key and initial value
+                if ip in ips_dict:                                      # check if IP is already in dict
+                    ips_dict[ip] = ips_dict.get(ip) + 1                 # if it is, increment value
+                else:
+                    ips_dict[ip] = 1                                    # if not, create key and initial value
 
     # sort dictionary
     sorted_ips_dict = sorted(ips_dict.items(), key=operator.itemgetter(1), reverse=True)
@@ -31,14 +37,17 @@ def request_types(n):
 
     with open('logs/access_collector.log') as log:                  # open access.log
         for line in log:                                            # loop through each line
+            ip = line.split(" ")[0]                                 # split and assign IP
             req = line.split('"')[1]                                # split line for request
             req_type = req.split(" ")[0]                            # split request for type
 
-            #if "200" not in line:                                  # check if request caused an error
-            if req_type in type_dict:                               # check if type in dictionary
-                type_dict[req_type] = type_dict.get(req_type) + 1   # if it is, increment by 1
+            if ip in whitelist:                                         # Check if IP is in whitelist
+                pass                                                    # if so, pass
             else:
-                type_dict[req_type] = 1                             # if not, create new key/value
+                if req_type in type_dict:                               # check if type in dictionary
+                    type_dict[req_type] = type_dict.get(req_type) + 1   # if it is, increment by 1
+                else:
+                    type_dict[req_type] = 1                             # if not, create new key/value
 
     # sort dictionary
     sorted_type_dict = sorted(type_dict.items(), key=operator.itemgetter(1), reverse=True)
@@ -56,12 +65,16 @@ def req_directory(n):
 
     with open('logs/access_collector.log') as log:                  # open access.log
         for line in log:                                            # loop through each line
+            ip = line.split(" ")[0]                                 # split and assign IP
             req = line.split(' ')[6]                                # split line for directory requested
 
-            if req in dir_dict:                                     # check if directory in dictionary
-                dir_dict[req] = dir_dict.get(req) + 1               # if it is, increment by one
+            if ip in whitelist:                                         # Check if IP is in whitelist
+                pass                                                    # if so, pass
             else:
-                dir_dict[req] = 1                                   # if not, create new key/value
+                if req in dir_dict:                                     # check if directory in dictionary
+                    dir_dict[req] = dir_dict.get(req) + 1               # if it is, increment by one
+                else:
+                    dir_dict[req] = 1                                   # if not, create new key/value
 
     # sort dictionary
     sorted_req_dict = sorted(dir_dict.items(), key=operator.itemgetter(1), reverse=True)
@@ -79,13 +92,17 @@ def req_response(n):
 
     with open('logs/access_collector.log') as log:
         for line in log:
+            ip = line.split(" ")[0]                                 # split and assign IP
             resp = line.split('"')[2].strip()
             resp_type = resp.split(' ')[0]
 
-            if resp_type in resp_dict:
-                resp_dict[resp_type] = resp_dict.get(resp_type) + 1
+            if ip in whitelist:                                         # Check if IP is in whitelist
+                pass                                                    # if so, pass
             else:
-                resp_dict[resp_type] = 1
+                if resp_type in resp_dict:
+                    resp_dict[resp_type] = resp_dict.get(resp_type) + 1     # check if response is in dictionary
+                else:                                                       # if it is, increment by one
+                    resp_dict[resp_type] = 1                                # if not, create new hey/value
 
     # sorted dictionary
     sorted_resp_dict = sorted(resp_dict.items(), key=operator.itemgetter(1), reverse=True)
