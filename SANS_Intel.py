@@ -87,14 +87,34 @@ def portdata():
     print(f'{lm2323["number"]}:{lm2323["data"]["records"]}')
 
 
+def suspicious():
+    # request data, decode json, save to variable
+    data = requests.get('https://isc.sans.edu/feeds/suspiciousdomains_High.txt')
+    line = data.text.split("\n")                            # split text by new lines
+    sus_ips = []                                            # create empty list
+
+    for i in line:                                          # for each line
+        if ("#" in i) or "Site" in i:                       # parse
+            pass
+        else:
+            sus_ips.append(i)                               # add ip to list
+
+    for ip in sus_ips:                                      # parse and print list
+        if ip != "":
+            print(f'{ip}')
+
+
 if __name__ == '__main__':
     # 3.1. Argparse help menu: display help menu
     parser = argparse.ArgumentParser(description='Parse and display SANS ISC DShield data by selecting a report below:')
-    parser.add_argument("--report", choices=['Summary', 'TargetPorts', 'TopIPs', 'PortData'], type=str)     # 3.2. define flags
-    args = parser.parse_args()                                                                  # 3.3. save input
-    arg = str(args.report).lower()                                                              # 3.4. assign input to var.
+    # 3.2. define flags
+    parser.add_argument("--report",
+                        choices=['Summary', 'TargetPorts', 'TopIPs', 'PortData', 'Suspicious'],
+                        type=str)
+    args = parser.parse_args()                  # 3.3. save input
+    arg = str(args.report).lower()              # 3.4. assign input to var.
 
-    if arg == 'summary':     # function decision tree, based on input
+    if arg == 'summary':                        # function decision tree, based on input
         summary()
     elif arg == 'targetports':
         targetports()
@@ -102,6 +122,8 @@ if __name__ == '__main__':
         topips()
     elif arg == 'portdata':
         portdata()
+    elif arg == 'suspicious':
+        suspicious()
     else:
         print('Ooops! Must be smarter than the options menu. Try the -h flag.')
 
