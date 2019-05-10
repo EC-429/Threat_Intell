@@ -118,27 +118,27 @@ def req_response(n):
 
 def req_traffic(n):
 
-    dict_200 = {}
-    dict_404 = {}
-    reg_200 = " 200 "
-    reg_404 = " 404 "
-    reg_date = "\d{2}/\w{3}/\d{4}"
+    dict_200 = {}                                               # Good traffic Dictionary
+    dict_404 = {}                                               # Bad traffic Dictionary
+    reg_200 = " 200 "                                           # Regex string to search for
+    reg_404 = " 404 "                                           # "                         "
+    reg_date = "\d{2}/\w{3}/\d{4}"                              # "                         "
 
     with open('logs/access_collector.log') as log:
-        for line in log:
-            ok = re.search(reg_200, line)
-            pnf = re.search(reg_404, line)
+        for line in log:                                        # loop through log file
+            ok = re.search(reg_200, line)                       # search for regex
+            pnf = re.search(reg_404, line)                      # "               "
 
-            if ok:
-                dts = re.search(reg_date, line)
+            if ok:                                              # If 200 regex is found
+                dts = re.search(reg_date, line)                 # search for date regex
                 dtm = dts.group(0)
 
-                if dtm in dict_200:
-                    dict_200[dtm] = dict_200[dtm] + 1
+                if dtm in dict_200:                             # If found date regex is in good traffic dictionary
+                    dict_200[dtm] = dict_200[dtm] + 1           # increment value integer
                 else:
-                    dict_200[dtm] = 1
+                    dict_200[dtm] = 1                           # else, add the key and assign initial value of 1
 
-            if pnf:
+            if pnf:                                             # same as above
                 pnfs = re.search(reg_date, line)
                 pnfm = pnfs.group(0)
 
@@ -147,11 +147,11 @@ def req_traffic(n):
                 else:
                     dict_404[pnfm] = 1
 
-    for key, value in dict_200.items():
-        print(f'200:{key}:{value}')
+    for x in list(dict_200)[0:n]:
+        print(f'{x}:{dict_200[x]}')
 
-    for key, value in dict_404.items():
-        print(f'404:{key}:{value}')
+    for y in list(dict_404)[0:n]:
+        print(f'{y}:{dict_404[y]}')
 
 
 def main():
