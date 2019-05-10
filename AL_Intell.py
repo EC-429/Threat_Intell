@@ -148,10 +148,10 @@ def req_traffic(n):
                     dict_404[pnfm] = 1
 
     for x in list(dict_200)[0:n]:
-        print(f'{x}:{dict_200[x]}')
+        print(f'200:{x}:{dict_200[x]}')
 
     for y in list(dict_404)[0:n]:
-        print(f'{y}:{dict_404[y]}')
+        print(f'400:{y}:{dict_404[y]}')
 
 
 def main():
