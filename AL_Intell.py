@@ -1,6 +1,7 @@
 # import packages
 import argparse
 import operator
+import re
 
 # WHITELIST: Add IP Addresses to the list below to be ignored if found in the access.log
 whitelist = ["127.0.0.1"]
@@ -114,13 +115,59 @@ def req_response(n):
         print(data)
 
 
+def req_traffic(n):
+
+    dict_200 = {}
+    dict_404 = {}
+    reg_200 = " 200 "
+    reg_404 = " 404 "
+    reg_date = "\d{2}/\w{3}/\d{4}"
+
+    with open('logs/access_collector.log') as log:
+        for line in log:
+            ok = re.search(reg_200, line)
+            pnf = re.search(reg_404, line)
+
+            if ok:
+                dts = re.search(reg_date, line)
+                dtm = dts.group(0)
+
+                if dtm in dict_200:
+                    dict_200[dtm] = dict_200[dtm] + 1
+                else:
+                    dict_200[dtm] = 1
+
+            if pnf:
+                pnfs = re.search(reg_date, line)
+                pnfm = pnfs.group(0)
+
+                if pnfm in dict_404:
+                    dict_404[pnfm] = dict_404[pnfm] + 1
+                else:
+                    dict_404[pnfm] = 1
+
+    # sorting dictionaries
+    sorted_dict_200 = sorted(dict_200.items(), key=operator.itemgetter(0), reverse=True)
+    sorted_dict_404 = sorted(dict_404.items(), key=operator.itemgetter(0), reverse=True)
+    # create top request response tuple list using user input
+    top_200_req = sorted_dict_200[0:n]
+    top_404_req = sorted_dict_404[0:n]
+
+    for items in top_200_req:
+        data = "200:" + str(items[0]) + ":" + str(items[1])
+        print(data)
+    for items in top_404_req:
+        data = "404:" + str(items[0]) + ":" + str(items[1])
+        print(data)
+
 def main():
     # argpase
     parser = argparse.ArgumentParser()
-    parser.add_argument("-o", "--offenders", type=int, help="Display top n requesting IPs")
-    parser.add_argument("-r", "--requests", type=int, help="Display top n request types")
-    parser.add_argument("-d", "--directories", type=int, help="Display top n requested directories")
-    parser.add_argument("-c", "--codes", type=int, help="Display top n response codes")
+    parser.add_argument("-o", "--offenders", type=int, help="Display top n requesting IPs (Ex: -o 5)")
+    parser.add_argument("-r", "--requests", type=int, help="Display top n request types (Ex: -r 3)")
+    parser.add_argument("-d", "--directories", type=int, help="Display top n requested directories (Ex: -d 7)")
+    parser.add_argument("-c", "--codes", type=int, help="Display top n response codes (Ex: -o 3)")
+    parser.add_argument("-t", "--traffic", type=int, help="Display most current traffic (Ex: -t 6)")
     # arg placeholder
 
     args = parser.parse_args()                                      # parser args
@@ -128,6 +175,7 @@ def main():
     requests = str(args.requests)
     directories = str(args.directories)
     codes = str(args.codes)
+    traffic = str(args.traffic)
 
     if offenders != "None":                                         # check if arguments have been passed
         ip_top_offenders(int(offenders))                            # if so, run the corresponding function
@@ -137,6 +185,8 @@ def main():
         req_directory(int(directories))
     elif codes != "None":
         req_response(int(codes))
+    elif traffic != "None":
+        req_traffic(int(traffic))
     else:
         "Opps! Try again. Must be smarter than the menu."
 
