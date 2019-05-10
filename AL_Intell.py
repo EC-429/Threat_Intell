@@ -3,6 +3,7 @@ import argparse
 import operator
 import re
 
+
 # WHITELIST: Add IP Addresses to the list below to be ignored if found in the access.log
 whitelist = ["127.0.0.1"]
 
@@ -146,19 +147,12 @@ def req_traffic(n):
                 else:
                     dict_404[pnfm] = 1
 
-    # sorting dictionaries
-    sorted_dict_200 = sorted(dict_200.items(), key=operator.itemgetter(0), reverse=True)
-    sorted_dict_404 = sorted(dict_404.items(), key=operator.itemgetter(0), reverse=True)
-    # create top request response tuple list using user input
-    top_200_req = sorted_dict_200[0:n]
-    top_404_req = sorted_dict_404[0:n]
+    for key, value in dict_200.items():
+        print(f'200:{key}:{value}')
 
-    for items in top_200_req:
-        data = "200:" + str(items[0]) + ":" + str(items[1])
-        print(data)
-    for items in top_404_req:
-        data = "404:" + str(items[0]) + ":" + str(items[1])
-        print(data)
+    for key, value in dict_404.items():
+        print(f'404:{key}:{value}')
+
 
 def main():
     # argpase
