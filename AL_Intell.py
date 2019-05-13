@@ -5,7 +5,8 @@ import re
 
 
 # WHITELIST: Add IP Addresses to the list below to be ignored if found in the access.log
-whitelist = ["127.0.0.1"]
+whitelist = ["127.0.0.1", "192.168.1.1"]
+reg_ip = "^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"                      # IP address regex
 
 
 def ip_top_offenders(n):
@@ -13,15 +14,17 @@ def ip_top_offenders(n):
 
     with open('logs/access_collector.log') as log:                  # open access.log
         for line in log:                                            # loop through each line
-            ip = line.split(" ")[0]                                 # split and assign IP
+            ips = re.search(reg_ip, line)                           # search line for regex
+            if ips: ip = ips.group(0)                               # if successful, assign result to var.
+            else: pass                                              # else, pass
 
-            if ip in whitelist:                                         # Check if IP is in whitelist
-                pass                                                    # if so, pass
+            if ip in whitelist:                                     # Check if IP is in whitelist
+                pass                                                # if so, pass
             else:
-                if ip in ips_dict:                                      # check if IP is already in dict
-                    ips_dict[ip] = ips_dict.get(ip) + 1                 # if it is, increment value
+                if ip in ips_dict:                                  # check if IP is already in dict
+                    ips_dict[ip] = ips_dict.get(ip) + 1             # if it is, increment value
                 else:
-                    ips_dict[ip] = 1                                    # if not, create key and initial value
+                    ips_dict[ip] = 1                                # if not, create key and initial value
 
     # sort dictionary
     sorted_ips_dict = sorted(ips_dict.items(), key=operator.itemgetter(1), reverse=True)
@@ -36,12 +39,17 @@ def ip_top_offenders(n):
 
 def request_types(n):
     type_dict = {}                                                  # dictionary
+    reg_types = "GET|POST|HEAd|OPTIONS|PUT|DELETE|CONNECT|TRACE"    # request type regex
 
     with open('logs/access_collector.log') as log:                  # open access.log
         for line in log:                                            # loop through each line
-            ip = line.split(" ")[0]                                 # split and assign IP
-            req = line.split('"')[1]                                # split line for request
-            req_type = req.split(" ")[0]                            # split request for type
+            ips = re.search(reg_ip, line)                           # search line for regex
+            if ips: ip = ips.group(0)                               # if successful, assign result to var.
+            else: pass                                              # else, pass
+
+            types = re.search(reg_types, line)                      # search line for regex
+            if types: req_type = types.group(0)                     # if successful, assign result to var.
+            else: pass                                              # else pass
 
             if ip in whitelist:                                         # Check if IP is in whitelist
                 pass                                                    # if so, pass
@@ -67,7 +75,10 @@ def req_directory(n):
 
     with open('logs/access_collector.log') as log:                  # open access.log
         for line in log:                                            # loop through each line
-            ip = line.split(" ")[0]                                 # split and assign IP
+            ips = re.search(reg_ip, line)                           # search line for regex
+            if ips: ip = ips.group(0)                               # if successful, assign result to var.
+            else: pass                                              # else, pass
+
             req = line.split(' ')[6]                                # split line for directory requested
 
             if ip in whitelist:                                         # Check if IP is in whitelist
@@ -91,20 +102,25 @@ def req_directory(n):
 
 def req_response(n):
     resp_dict = {}
+    reg_codes = "200|201|204|301|302|304|400|401|403|404|409|500"  # response code regex
 
     with open('logs/access_collector.log') as log:
         for line in log:
-            ip = line.split(" ")[0]                                 # split and assign IP
-            resp = line.split('"')[2].strip()
-            resp_type = resp.split(' ')[0]
+            ips = re.search(reg_ip, line)                           # search line for regex
+            if ips: ip = ips.group(0)                               # if successful, assign result to var.
+            else: pass                                              # else, pass
 
-            if ip in whitelist:                                         # Check if IP is in whitelist
-                pass                                                    # if so, pass
+            codes = re.search(reg_codes, line)                      # search line for regex
+            if codes: resp_code = codes.group(0)                    # if successful, assign result to var.
+            else: pass                                              # else pass
+
+            if ip in whitelist:                                             # Check if IP is in whitelist
+                pass                                                        # if so, pass
             else:
-                if resp_type in resp_dict:
-                    resp_dict[resp_type] = resp_dict.get(resp_type) + 1     # check if response is in dictionary
+                if resp_code in resp_dict:
+                    resp_dict[resp_code] = resp_dict.get(resp_code) + 1     # check if response is in dictionary
                 else:                                                       # if it is, increment by one
-                    resp_dict[resp_type] = 1                                # if not, create new hey/value
+                    resp_dict[resp_code] = 1                                # if not, create new hey/value
 
     # sorted dictionary
     sorted_resp_dict = sorted(resp_dict.items(), key=operator.itemgetter(1), reverse=True)
@@ -126,26 +142,33 @@ def req_traffic(n):
 
     with open('logs/access_collector.log') as log:
         for line in log:                                        # loop through log file
-            ok = re.search(reg_200, line)                       # search for regex
-            pnf = re.search(reg_404, line)                      # "               "
+            ips = re.search(reg_ip, line)                           # search line for regex
+            if ips: ip = ips.group(0)                               # if successful, assign result to var.
+            else: pass                                              # else, pass
 
-            if ok:                                              # If 200 regex is found
-                dts = re.search(reg_date, line)                 # search for date regex
-                dtm = dts.group(0)
+            if ip in whitelist:                                             # Check if IP is in whitelist
+                pass                                                        # if so, pass
+            else:
+                ok = re.search(reg_200, line)                       # search for regex
+                pnf = re.search(reg_404, line)                      # "               "
 
-                if dtm in dict_200:                             # If found date regex is in good traffic dictionary
-                    dict_200[dtm] = dict_200[dtm] + 1           # increment value integer
-                else:
-                    dict_200[dtm] = 1                           # else, add the key and assign initial value of 1
+                if ok:                                              # If 200 regex is found
+                    dts = re.search(reg_date, line)                 # search for date regex
+                    dtm = dts.group(0)
 
-            if pnf:                                             # same as above
-                pnfs = re.search(reg_date, line)
-                pnfm = pnfs.group(0)
+                    if dtm in dict_200:                             # If found date regex is in good traffic dictionary
+                        dict_200[dtm] = dict_200[dtm] + 1           # increment value integer
+                    else:
+                        dict_200[dtm] = 1                           # else, add the key and assign initial value of 1
 
-                if pnfm in dict_404:
-                    dict_404[pnfm] = dict_404[pnfm] + 1
-                else:
-                    dict_404[pnfm] = 1
+                if pnf:                                             # same as above
+                    pnfs = re.search(reg_date, line)
+                    pnfm = pnfs.group(0)
+
+                    if pnfm in dict_404:
+                        dict_404[pnfm] = dict_404[pnfm] + 1
+                    else:
+                        dict_404[pnfm] = 1
 
     for x in list(dict_200)[0:n]:
         print(f'200:{x}:{dict_200[x]}')
