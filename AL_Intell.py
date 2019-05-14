@@ -102,7 +102,7 @@ def req_directory(n):
 
 def req_response(n):
     resp_dict = {}
-    reg_codes = "200|201|204|301|302|304|400|401|403|404|409|500"  # response code regex
+    reg_codes = " 200 | 201 | 204 | 301 | 302 | 304 | 400 | 401 | 403 | 404 | 409 | 500 "  # response code regex
 
     with open('logs/access_collector.log') as log:
         for line in log:
@@ -111,7 +111,7 @@ def req_response(n):
             else: pass                                              # else, pass
 
             codes = re.search(reg_codes, line)                      # search line for regex
-            if codes: resp_code = codes.group(0)                    # if successful, assign result to var.
+            if codes: resp_code = codes.group(0).strip()            # if successful, assign result to var.
             else: pass                                              # else pass
 
             if ip in whitelist:                                             # Check if IP is in whitelist
