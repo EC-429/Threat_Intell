@@ -39,7 +39,7 @@ def ip_top_offenders(n):
 
 def request_types(n):
     type_dict = {}                                                  # dictionary
-    reg_types = "GET|POST|HEAd|OPTIONS|PUT|DELETE|CONNECT|TRACE"    # request type regex
+    reg_types = "GET|POST|HEAD|OPTIONS|PUT|DELETE|CONNECT|TRACE"    # request type regex
 
     with open('logs/access_collector.log') as log:                  # open access.log
         for line in log:                                            # loop through each line
@@ -71,26 +71,29 @@ def request_types(n):
 
 
 def req_directory(n):
-    dir_dict = {}                                                   # dictionary
+    req_dict = {}                                                           # dictionary
+    reg_req = '\s{1}(/|/[a-zA-Z0-9\/\.\_\?\=\%\:\-\&\[\]\!\+\\\]+)\s{1}'    # request directory regex
 
-    with open('logs/access_collector.log') as log:                  # open access.log
-        for line in log:                                            # loop through each line
-            ips = re.search(reg_ip, line)                           # search line for regex
-            if ips: ip = ips.group(0)                               # if successful, assign result to var.
-            else: pass                                              # else, pass
+    with open('logs/access_collector.log') as log:                          # open access.log
+        for line in log:                                                    # loop through each line
+            ips = re.search(reg_ip, line)                                   # search line for regex
+            if ips: ip = ips.group(0)                                       # if successful, assign result to var.
+            else: pass                                                      # else, pass
 
-            req = line.split(' ')[6]                                # split line for directory requested
+            reqs = re.search(reg_req, line)                                 # search line for regex
+            if reqs: req_url = reqs.group(0).strip()                        # if successful, assign result to var.
+            else: pass
 
-            if ip in whitelist:                                         # Check if IP is in whitelist
-                pass                                                    # if so, pass
+            if ip in whitelist:                                             # Check if IP is in whitelist
+                pass                                                        # if so, pass
             else:
-                if req in dir_dict:                                     # check if directory in dictionary
-                    dir_dict[req] = dir_dict.get(req) + 1               # if it is, increment by one
+                if req_url in req_dict:                                     # check if directory in dictionary
+                    req_dict[req_url] = req_dict.get(req_url) + 1           # if it is, increment by one
                 else:
-                    dir_dict[req] = 1                                   # if not, create new key/value
+                    req_dict[req_url] = 1                                   # if not, create new key/value
 
     # sort dictionary
-    sorted_req_dict = sorted(dir_dict.items(), key=operator.itemgetter(1), reverse=True)
+    sorted_req_dict = sorted(req_dict.items(), key=operator.itemgetter(1), reverse=True)
     # create top requested directory tuple list using user input
     top_dir_req = sorted_req_dict[0:n]
 
